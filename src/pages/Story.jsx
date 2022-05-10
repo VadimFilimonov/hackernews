@@ -1,15 +1,27 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
-import { Stack } from 'react-bootstrap';
+import { Stack, Spinner } from 'react-bootstrap';
+import { fetchStory, selectors } from '../slices/storiesSlice';
 import routes from '../routes';
 
 const Story = () => {
+  const dispatch = useDispatch();
   const { id } = useParams();
-  const story = useSelector((state) => state.stories.list.find((item) => item.id === Number(id)));
+  const story = useSelector((state) => selectors.selectById(state, Number(id)));
+
+  useEffect(() => {
+    if (!story) {
+      dispatch(fetchStory(id));
+    }
+  }, [id, story, dispatch]);
 
   if (!story) {
-    return null;
+    return (
+      <Spinner animation="border" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </Spinner>
+    );
   }
 
   const { url, title, time, score, by, descendants } = story;
@@ -17,7 +29,9 @@ const Story = () => {
   return (
     <Stack>
       <Link to={routes.homePath()}>Home</Link>
-      <a href={url}>Source</a>
+      <a href={url} target="_blank" rel="noreferrer">
+        Source
+      </a>
       <h1>{title}</h1>
       <time>{time}</time>
       <div>

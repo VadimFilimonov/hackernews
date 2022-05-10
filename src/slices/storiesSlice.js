@@ -1,28 +1,13 @@
 /* eslint-disable no-param-reassign */
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import routes from '../routes';
+import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
+import * as api from '../api';
 
-const STORIES_COUNT_LIMIT = 100;
+export const fetchStories = createAsyncThunk('stories/fetchStories', api.fetchStories);
+export const fetchStory = createAsyncThunk('stories/fetchStory', api.fetchStory);
 
-export const fetchStories = createAsyncThunk('stories/fetchStories', async () => {
-  const response = await fetch(routes.storiesPath());
-  const ids = await response.json();
-  const slicedIds = ids.slice(0, STORIES_COUNT_LIMIT);
-  const stories = await Promise.all(
-    slicedIds.map(async (id) => {
-      const storyResponse = await fetch(routes.itemPath(id));
-      const story = await storyResponse.json();
-      return story;
-    })
-  );
-  return stories;
-});
+const storiesAdapter = createEntityAdapter();
 
-const initialState = {
-  list: [],
-  status: 'idle',
-  error: null,
-};
+const initialState = storiesAdapter.getInitialState({ status: 'idle', error: null });
 
 const storiesSlice = createSlice({
   name: 'stories',
@@ -33,11 +18,23 @@ const storiesSlice = createSlice({
         state.status = 'loading';
         state.error = null;
       })
-      .addCase(fetchStories.fulfilled, (state, action) => {
+      .addCase(fetchStories.fulfilled, (state, { payload }) => {
+        state.entities = payload.reduce((acc, current) => ({ ...acc, [current.id]: current }), {});
+        state.ids = payload.map(({ id }) => id);
         state.status = 'idle';
-        state.list = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchStory.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(fetchStory.fulfilled, (state, { payload }) => {
+        storiesAdapter.addOne(state, payload);
+        state.status = 'idle';
+        state.error = null;
       });
   },
 });
 
+export const selectors = storiesAdapter.getSelectors((state) => state.stories);
 export default storiesSlice.reducer;

@@ -1,11 +1,21 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Row, Stack, Spinner } from 'react-bootstrap';
+import { fetchStories, selectors } from '../../slices/storiesSlice';
 import routes from '../../routes';
+import { STORIES_COUNT_LIMIT } from '../../constants';
 
 const Stories = () => {
-  const { list, status } = useSelector((state) => state.stories);
+  const dispatch = useDispatch();
+  const { status } = useSelector((state) => state.stories);
+  const stories = useSelector(selectors.selectAll);
+
+  useEffect(() => {
+    if (stories.length < STORIES_COUNT_LIMIT) {
+      dispatch(fetchStories());
+    }
+  }, [stories, dispatch]);
 
   if (status === 'loading') {
     return (
@@ -17,15 +27,15 @@ const Stories = () => {
 
   return (
     <Stack gap={3}>
-      {list.map((story) => (
-        <Row key={story.id}>
+      {stories.map(({ id, title, score, by }) => (
+        <Row key={id}>
           <h2 className="h5">
-            <Link className="text-decoration-none" to={routes.newsPath(story.id)}>
-              {story.title}
+            <Link className="text-decoration-none" to={routes.postPath(id)}>
+              {title}
             </Link>
           </h2>
           <div>
-            {story.score} points by {story.by}
+            {score} points by {by}
           </div>
         </Row>
       ))}

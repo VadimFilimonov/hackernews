@@ -1,23 +1,17 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import { Container } from 'react-bootstrap';
-import { fetchStories } from './slices/storiesSlice';
+import routes from './routes';
 import Home from './pages/Home';
 import Story from './pages/Story';
 
 const App = () => {
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(fetchStories());
-  }, [dispatch]);
-
   return (
-    <Container className="mt-5">
+    <Container className="my-5">
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path=":id" exact element={<Story />} />
+        <Route path={routes.homePath()} element={<Home />} />
+        <Route path="/post/:id" exact element={<Story />} />
+        <Route path="*" element={<Home />} />
       </Routes>
     </Container>
   );
