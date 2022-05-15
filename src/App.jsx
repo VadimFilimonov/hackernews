@@ -10,7 +10,7 @@ const App = () => {
     <Container className="my-5">
       <Routes>
         <Route path={routes.homePath()} element={<Home />} />
-        <Route path="/post/:id" exact element={<Story />} />
+        <Route path="/hackernews/:id" exact element={<Story />} />
         <Route path="*" element={<Home />} />
       </Routes>
     </Container>

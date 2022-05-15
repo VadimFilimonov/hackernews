@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Row, Stack, Spinner } from 'react-bootstrap';
+import { Stack, Spinner, Card } from 'react-bootstrap';
 import { fetchStories, selectors } from '../../slices/storiesSlice';
 import routes from '../../routes';
 import { STORIES_COUNT_LIMIT } from '../../constants';
@@ -27,18 +27,21 @@ const Stories = () => {
 
   return (
     <Stack gap={3}>
-      {stories.map(({ id, title, score, by }) => (
-        <Row key={id}>
-          <h2 className="h5">
-            <Link className="text-decoration-none" to={routes.postPath(id)}>
-              {title}
-            </Link>
-          </h2>
-          <div>
-            {score} points by {by}
-          </div>
-        </Row>
-      ))}
+      {stories
+        .filter(({ type }) => type !== 'comment')
+        .map(({ id, title, score, by }) => (
+          <Card key={id} className="col-12 col-lg-6">
+            <Card.Body>
+              <Card.Title>{title}</Card.Title>
+              <Card.Text>
+                {score} points by {by}
+              </Card.Text>
+              <Link className="stretched-link" to={routes.postPath(id)}>
+                More
+              </Link>
+            </Card.Body>
+          </Card>
+        ))}
     </Stack>
   );
 };

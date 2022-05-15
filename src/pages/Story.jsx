@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
-import { Stack, Spinner } from 'react-bootstrap';
-import { fetchStory, selectors } from '../slices/storiesSlice';
+import { Breadcrumb, Stack, Spinner } from 'react-bootstrap';
+import { fetchComments, fetchItem, selectors } from '../slices/storiesSlice';
 import routes from '../routes';
+import Comments from '../components/Comments';
+import { convertTimestampToDate } from '../utilities/time';
 
 const Story = () => {
   const dispatch = useDispatch();
@@ -12,14 +14,20 @@ const Story = () => {
 
   useEffect(() => {
     if (!story) {
-      dispatch(fetchStory(id));
+      dispatch(fetchItem(id));
     }
   }, [id, story, dispatch]);
+
+  useEffect(() => {
+    if (story && story.kids) {
+      dispatch(fetchComments(story.kids));
+    }
+  }, [story, dispatch]);
 
   if (!story) {
     return (
       <Spinner animation="border" role="status">
-        <span className="visually-hidden">Loading...</span>
+        <span className="visually-hidden">Loading....</span>
       </Spinner>
     );
   }
@@ -28,16 +36,23 @@ const Story = () => {
 
   return (
     <Stack>
-      <Link to={routes.homePath()}>Home</Link>
-      <a href={url} target="_blank" rel="noreferrer">
-        Source
-      </a>
+      <Breadcrumb>
+        <Breadcrumb.Item linkAs={Link} linkProps={{ to: routes.homePath() }}>
+          Home
+        </Breadcrumb.Item>
+        <Breadcrumb.Item active>{title}</Breadcrumb.Item>
+      </Breadcrumb>
       <h1>{title}</h1>
-      <time>{time}</time>
+      <time className="text-muted">{convertTimestampToDate(time)}</time>
       <div>
-        {score} points by {by}
+        {score} points by <i>{by}</i> /{' '}
+        <a href={url} target="_blank" rel="noreferrer">
+          Source
+        </a>
       </div>
-      <div>The total comments count: {descendants}</div>
+
+      {descendants && <div className="my-3">The total comments count: {descendants}</div>}
+      <Comments ids={story?.kids} />
     </Stack>
   );
 };

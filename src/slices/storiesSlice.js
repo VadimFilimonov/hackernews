@@ -3,7 +3,8 @@ import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/too
 import * as api from '../api';
 
 export const fetchStories = createAsyncThunk('stories/fetchStories', api.fetchStories);
-export const fetchStory = createAsyncThunk('stories/fetchStory', api.fetchStory);
+export const fetchComments = createAsyncThunk('stories/fetchComments', api.fetchComments);
+export const fetchItem = createAsyncThunk('stories/fetchStory', api.fetchItem);
 
 const storiesAdapter = createEntityAdapter();
 
@@ -19,16 +20,25 @@ const storiesSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchStories.fulfilled, (state, { payload }) => {
-        state.entities = payload.reduce((acc, current) => ({ ...acc, [current.id]: current }), {});
-        state.ids = payload.map(({ id }) => id);
+        storiesAdapter.addMany(state, payload);
         state.status = 'idle';
         state.error = null;
       })
-      .addCase(fetchStory.pending, (state) => {
+      // TODO: extract comments into other slice
+      .addCase(fetchComments.pending, (state) => {
         state.status = 'loading';
         state.error = null;
       })
-      .addCase(fetchStory.fulfilled, (state, { payload }) => {
+      .addCase(fetchComments.fulfilled, (state, { payload }) => {
+        storiesAdapter.addMany(state, payload);
+        state.status = 'idle';
+        state.error = null;
+      })
+      .addCase(fetchItem.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(fetchItem.fulfilled, (state, { payload }) => {
         storiesAdapter.addOne(state, payload);
         state.status = 'idle';
         state.error = null;
