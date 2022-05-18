@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
-import { Breadcrumb, Stack, Spinner } from 'react-bootstrap';
-import { fetchComments, fetchItem, selectors } from '../slices/storiesSlice';
+import { Badge, Stack, Spinner, Table } from 'react-bootstrap';
+import { fetchItem, selectors } from '../slices/storiesSlice';
+import { fetchComments } from '../slices/commentsSlice';
 import routes from '../routes';
 import Comments from '../components/Comments';
 import { convertTimestampToDate } from '../utilities/time';
@@ -10,6 +11,7 @@ import { convertTimestampToDate } from '../utilities/time';
 const Story = () => {
   const dispatch = useDispatch();
   const { id } = useParams();
+  // TODO: delete saved state
   const story = useSelector((state) => selectors.selectById(state, Number(id)));
 
   useEffect(() => {
@@ -19,10 +21,14 @@ const Story = () => {
   }, [id, story, dispatch]);
 
   useEffect(() => {
-    if (story && story.kids) {
+    if (story?.kids) {
       dispatch(fetchComments(story.kids));
     }
-  }, [story, dispatch]);
+  }, [story?.kids, dispatch]);
+
+  const handleLoadChildrenComments = (ids) => {
+    dispatch(fetchComments(ids));
+  };
 
   if (!story) {
     return (
@@ -35,24 +41,47 @@ const Story = () => {
   const { url, title, time, score, by, descendants } = story;
 
   return (
-    <Stack>
-      <Breadcrumb>
-        <Breadcrumb.Item linkAs={Link} linkProps={{ to: routes.homePath() }}>
-          Home
-        </Breadcrumb.Item>
-        <Breadcrumb.Item active>{title}</Breadcrumb.Item>
-      </Breadcrumb>
+    <Stack gap={3}>
+      <Link className="btn btn-primary align-self-start" role="button" to={routes.homePath()}>
+        Back to Home page
+      </Link>
       <h1>{title}</h1>
-      <time className="text-muted">{convertTimestampToDate(time)}</time>
-      <div>
-        {score} points by <i>{by}</i> /{' '}
-        <a href={url} target="_blank" rel="noreferrer">
-          Source
-        </a>
-      </div>
+      <Table striped bordered responsive>
+        <tbody>
+          <tr>
+            <th>Date</th>
+            <td>
+              <time>{convertTimestampToDate(time)}</time>
+            </td>
+          </tr>
+          <tr>
+            <th>Points</th>
+            <td>{score}</td>
+          </tr>
+          <tr>
+            <th>Author</th>
+            <td>{by}</td>
+          </tr>
+          <tr>
+            <th>Source</th>
+            <td>
+              <a href={url} target="_blank" rel="noreferrer">
+                Link
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </Table>
 
-      {descendants && <div className="my-3">The total comments count: {descendants}</div>}
-      <Comments ids={story?.kids} />
+      {descendants && (
+        <div className="d-flex">
+          <h2>Comments </h2>
+          <Badge className="align-self-start mx-1" pill bg="primary">
+            {descendants}
+          </Badge>
+        </div>
+      )}
+      <Comments ids={story?.kids} onLoadChildrenComments={handleLoadChildrenComments} />
     </Stack>
   );
 };

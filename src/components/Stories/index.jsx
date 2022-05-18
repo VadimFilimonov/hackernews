@@ -27,21 +27,19 @@ const Stories = () => {
 
   return (
     <Stack gap={3}>
-      {stories
-        .filter(({ type }) => type !== 'comment')
-        .map(({ id, title, score, by }) => (
-          <Card key={id} className="col-12 col-lg-6">
-            <Card.Body>
-              <Card.Title>{title}</Card.Title>
-              <Card.Text>
-                {score} points by {by}
-              </Card.Text>
-              <Link className="stretched-link" to={routes.postPath(id)}>
-                More
-              </Link>
-            </Card.Body>
-          </Card>
-        ))}
+      {stories.map(({ id, title, score, by }) => (
+        <Card key={id} className="col-12 col-lg-6">
+          <Card.Body>
+            <Card.Title>{title}</Card.Title>
+            <Card.Text>
+              {score} points by {by}
+            </Card.Text>
+            <Link className="stretched-link" to={routes.postPath(id)}>
+              More
+            </Link>
+          </Card.Body>
+        </Card>
+      ))}
     </Stack>
   );
 };
