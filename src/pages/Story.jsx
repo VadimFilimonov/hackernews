@@ -6,7 +6,7 @@ import { fetchItem, selectors } from '../slices/storiesSlice';
 import { clearComments, fetchComments } from '../slices/commentsSlice';
 import routes from '../routes';
 import Comments from '../components/Comments';
-import { convertTimestampToDate } from '../utilities/time';
+import { convertTimestampToRelativeTime } from '../utilities/time';
 
 const Story = () => {
   const dispatch = useDispatch();
@@ -17,7 +17,7 @@ const Story = () => {
     if (!story) {
       dispatch(fetchItem(id));
     }
-  }, [id, story]);
+  }, [id, story, dispatch]);
 
   useEffect(() => {
     if (story?.kids) {
@@ -27,7 +27,7 @@ const Story = () => {
     return () => {
       dispatch(clearComments());
     };
-  }, [story?.kids]);
+  }, [story?.kids, dispatch]);
 
   const handleRefreshComments = () => {
     dispatch(clearComments());
@@ -51,7 +51,7 @@ const Story = () => {
   return (
     <Stack gap={3}>
       <Link className="btn btn-primary align-self-start" to={routes.homePath()}>
-        Back to Home
+        Back
       </Link>
       <h1>{title}</h1>
       <Table striped bordered responsive>
@@ -59,7 +59,7 @@ const Story = () => {
           <tr>
             <th>Date</th>
             <td>
-              <time>{convertTimestampToDate(time)}</time>
+              <time>{convertTimestampToRelativeTime(time)}</time>
             </td>
           </tr>
           <tr>

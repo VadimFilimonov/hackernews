@@ -1,14 +1,15 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Button, ListGroup } from 'react-bootstrap';
-import { convertTimestampToDate } from '../../utilities/time';
+import { convertTimestampToRelativeTime } from '../../utilities/time';
 
 const Comments = ({ ids = [], onLoadChildrenComments }) => {
   const comments = useSelector((state) =>
     ids
       .filter((id) => state.comments.entities[id])
       .map((id) => state.comments.entities[id])
-      .filter(({ deleted, dead }) => !deleted && !dead)
+      .filter(({ deleted }) => !deleted)
+      .sort((a, b) => a.time - b.time)
   );
 
   if (comments.length === 0) {
@@ -18,9 +19,9 @@ const Comments = ({ ids = [], onLoadChildrenComments }) => {
   return (
     <ListGroup as="ul" variant="flush">
       {comments.map((comment) => (
-        <ListGroup.Item key={comment.id} as="li">
+        <ListGroup.Item key={comment.id} disabled={comment.dead} as="li">
           <div className="fw-bold">
-            {comment.by} / {convertTimestampToDate(comment.time)}{' '}
+            {comment.by} / {convertTimestampToRelativeTime(comment.time)}{' '}
           </div>
           {/* eslint-disable-next-line react/no-danger */}
           <div dangerouslySetInnerHTML={{ __html: comment.text }} />
