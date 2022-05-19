@@ -12,6 +12,12 @@ const initialState = commentsAdapter.getInitialState({ status: 'idle', error: nu
 const commentsSlice = createSlice({
   name: 'comments',
   initialState,
+  reducers: {
+    clearComments: (state) => {
+      state.entities = {};
+      state.ids = [];
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchComments.pending, (state) => {
@@ -29,5 +35,6 @@ const commentsSlice = createSlice({
   },
 });
 
+export const { clearComments } = commentsSlice.actions;
 export const selectors = commentsAdapter.getSelectors((state) => state.comments);
 export default commentsSlice.reducer;

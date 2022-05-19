@@ -19,7 +19,7 @@ const storiesSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchStories.fulfilled, (state, { payload }) => {
-        storiesAdapter.addMany(state, payload);
+        storiesAdapter.setMany(state, payload);
         state.status = 'idle';
         state.error = null;
       })

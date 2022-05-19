@@ -1,21 +1,22 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Stack, Spinner, Card } from 'react-bootstrap';
-import { fetchStories, selectors } from '../../slices/storiesSlice';
+import { Stack, Spinner, Card, Button } from 'react-bootstrap';
+import { fetchStories } from '../../slices/storiesSlice';
 import routes from '../../routes';
-import { STORIES_COUNT_LIMIT } from '../../constants';
 
 const Stories = () => {
   const dispatch = useDispatch();
   const { status } = useSelector((state) => state.stories);
-  const stories = useSelector(selectors.selectAll);
+  const stories = useSelector((state) => Object.values(state.stories.entities).sort((a, b) => b.time - a.time));
 
   useEffect(() => {
-    if (stories.length < STORIES_COUNT_LIMIT) {
-      dispatch(fetchStories());
-    }
-  }, [stories, dispatch]);
+    dispatch(fetchStories());
+  }, [dispatch]);
+
+  const handleRefreshStories = () => {
+    dispatch(fetchStories());
+  };
 
   if (status === 'loading') {
     return (
@@ -26,21 +27,24 @@ const Stories = () => {
   }
 
   return (
-    <Stack gap={3}>
-      {stories.map(({ id, title, score, by }) => (
-        <Card key={id} className="col-12 col-lg-6">
-          <Card.Body>
-            <Card.Title>{title}</Card.Title>
-            <Card.Text>
-              {score} points by {by}
-            </Card.Text>
-            <Link className="stretched-link" to={routes.postPath(id)}>
-              More
-            </Link>
-          </Card.Body>
-        </Card>
-      ))}
-    </Stack>
+    <>
+      <Button className="mb-3" onClick={handleRefreshStories}>
+        Refresh
+      </Button>
+      <Stack gap={3} className="col-12 col-lg-6">
+        {stories.map(({ id, title, score, by }) => (
+          <Card key={id}>
+            <Card.Body>
+              <Card.Title>{title}</Card.Title>
+              <Card.Text>
+                {score} points by {by}
+              </Card.Text>
+              <Link to={routes.postPath(id)}>More</Link>
+            </Card.Body>
+          </Card>
+        ))}
+      </Stack>
+    </>
   );
 };
 

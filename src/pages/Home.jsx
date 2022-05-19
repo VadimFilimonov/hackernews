@@ -4,7 +4,7 @@ import Stories from '../components/Stories';
 const Home = () => {
   return (
     <>
-      <h1 className="mb-4">HackerNews</h1>
+      <h1 className="mb-3">HackerNews</h1>
       <Stories />
     </>
   );

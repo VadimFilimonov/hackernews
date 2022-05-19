@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
-import { Badge, Stack, Spinner, Table } from 'react-bootstrap';
+import { Button, Stack, Spinner, Table } from 'react-bootstrap';
 import { fetchItem, selectors } from '../slices/storiesSlice';
-import { fetchComments } from '../slices/commentsSlice';
+import { clearComments, fetchComments } from '../slices/commentsSlice';
 import routes from '../routes';
 import Comments from '../components/Comments';
 import { convertTimestampToDate } from '../utilities/time';
@@ -11,20 +11,28 @@ import { convertTimestampToDate } from '../utilities/time';
 const Story = () => {
   const dispatch = useDispatch();
   const { id } = useParams();
-  // TODO: delete saved state
   const story = useSelector((state) => selectors.selectById(state, Number(id)));
 
   useEffect(() => {
     if (!story) {
       dispatch(fetchItem(id));
     }
-  }, [id, story, dispatch]);
+  }, [id, story]);
 
   useEffect(() => {
     if (story?.kids) {
       dispatch(fetchComments(story.kids));
     }
-  }, [story?.kids, dispatch]);
+
+    return () => {
+      dispatch(clearComments());
+    };
+  }, [story?.kids]);
+
+  const handleRefreshComments = () => {
+    dispatch(clearComments());
+    dispatch(fetchComments(story.kids));
+  };
 
   const handleLoadChildrenComments = (ids) => {
     dispatch(fetchComments(ids));
@@ -42,8 +50,8 @@ const Story = () => {
 
   return (
     <Stack gap={3}>
-      <Link className="btn btn-primary align-self-start" role="button" to={routes.homePath()}>
-        Back to Home page
+      <Link className="btn btn-primary align-self-start" to={routes.homePath()}>
+        Back to Home
       </Link>
       <h1>{title}</h1>
       <Table striped bordered responsive>
@@ -73,15 +81,15 @@ const Story = () => {
         </tbody>
       </Table>
 
-      {descendants && (
-        <div className="d-flex">
-          <h2>Comments </h2>
-          <Badge className="align-self-start mx-1" pill bg="primary">
-            {descendants}
-          </Badge>
-        </div>
+      {Boolean(descendants) && (
+        <>
+          <div className="d-flex justify-content-between">
+            <h2>Comments</h2>
+            <Button onClick={handleRefreshComments}>Refresh</Button>
+          </div>
+          <Comments ids={story.kids} onLoadChildrenComments={handleLoadChildrenComments} />
+        </>
       )}
-      <Comments ids={story?.kids} onLoadChildrenComments={handleLoadChildrenComments} />
     </Stack>
   );
 };
