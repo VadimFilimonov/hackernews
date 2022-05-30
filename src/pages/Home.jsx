@@ -2,11 +2,13 @@ import React, { useEffect } from 'react';
 import { Button, Card, Spinner, Stack } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import routes from '../routes';
 import { fetchStories } from '../slices/storiesSlice';
 import { convertTimestampToRelativeTime } from '../utilities/time';
 
 const Home = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { status } = useSelector((state) => state.stories);
   const stories = useSelector((state) => Object.values(state.stories.entities).sort((a, b) => b.time - a.time));
@@ -25,12 +27,12 @@ const Home = () => {
     <>
       <h1 className="mb-3">HackerNews</h1>
       <Button className="mb-3" onClick={handleRefreshStories}>
-        Refresh
+        {t('refresh')}
       </Button>
       <hr />
       {status === 'loading' && (
         <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
+          <span className="visually-hidden">{t('spinnerText')}</span>
         </Spinner>
       )}
       {status === 'idle' && (
@@ -40,9 +42,9 @@ const Home = () => {
               <Card.Body>
                 <Card.Title>{title}</Card.Title>
                 <Card.Text>
-                  {score} points by {by} {convertTimestampToRelativeTime(time)} | {descendants} comments
+                  {t('cardText', { score, by, descendants, time: convertTimestampToRelativeTime(time) })}
                 </Card.Text>
-                <Link to={routes.postPath(id)}>More</Link>
+                <Link to={routes.postPath(id)}>{t('more')}</Link>
               </Card.Body>
             </Card>
           ))}

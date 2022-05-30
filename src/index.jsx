@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { store } from './slices';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import './i18n';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const container = document.getElementById('root');

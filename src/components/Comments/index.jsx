@@ -1,9 +1,11 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Button, ListGroup } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import { convertTimestampToRelativeTime } from '../../utilities/time';
 
 const Comments = ({ ids = [], onLoadChildrenComments }) => {
+  const { t } = useTranslation();
   const comments = useSelector((state) =>
     ids
       .filter((id) => state.comments.entities[id])
@@ -34,7 +36,7 @@ const Comments = ({ ids = [], onLoadChildrenComments }) => {
                 size="sm"
                 onClick={() => onLoadChildrenComments(comment.kids)}
               >
-                {comment.kids.length} comments
+                {t('expandCommentsButton', { count: comment.kids.length })}
               </Button>
               <div className="mt-3 mx-3">
                 <Comments ids={comment.kids} onLoadChildrenComments={onLoadChildrenComments} />
